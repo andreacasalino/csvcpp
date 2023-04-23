@@ -8,7 +8,7 @@
 
 namespace csvpp {
 namespace {
-Line split(std::string &line, const std::string &sep) {
+Line split(std::string &line, char sep) {
   Line res;
   std::size_t pos = 0;
   while (pos < line.size()) {
@@ -17,7 +17,7 @@ Line split(std::string &line, const std::string &sep) {
       sep_begin = line.size();
     }
     res.emplace_back(std::string_view{line.data() + pos, sep_begin - pos});
-    pos = sep_begin + sep.size();
+    pos = sep_begin + 1;
   }
   return res;
 }
@@ -49,16 +49,7 @@ std::vector<std::size_t> parse_headers(const Line &raw,
 }
 } // namespace
 
-void read(const std::string &fileName, LineProcessor &proc, char separator) {
-  read(fileName, proc, std::to_string(separator));
-}
-
-void read(const std::string &fileName, LineProcessor &proc,
-          const std::string &separator) {
-  if (separator.empty()) {
-    throw std::runtime_error{"empty separator"};
-  }
-
+void Reader::read(const std::string &fileName, LineProcessor &proc) const {
   std::ifstream stream{fileName};
   if (!stream.is_open()) {
     std::stringstream err;
@@ -71,7 +62,7 @@ void read(const std::string &fileName, LineProcessor &proc,
   std::size_t headersSize;
   {
     std::getline(stream, lineBuffer);
-    auto raw = split(lineBuffer, separator);
+    auto raw = split(lineBuffer, separator_);
     headersSize = raw.size();
     if (auto fields = proc.expectedFields(); fields != nullptr) {
       indices = parse_headers(raw, *fields);
@@ -83,7 +74,7 @@ void read(const std::string &fileName, LineProcessor &proc,
     if (lineBuffer.empty()) {
       continue;
     }
-    auto slices = split(lineBuffer, separator);
+    auto slices = split(lineBuffer, separator_);
     if (slices.size() != headersSize) {
       throw std::runtime_error{"found at least one line with a different "
                                "number of elements w.r.t. to headers"};
@@ -99,5 +90,4 @@ void read(const std::string &fileName, LineProcessor &proc,
     proc.process(slices);
   }
 }
-
 } // namespace csvpp

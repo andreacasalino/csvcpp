@@ -43,11 +43,11 @@ public:
   }
 
   template <typename ProcessAction, typename... Fields>
-  static void process(const std::string &separator, const std::string &fileName,
+  static void process(const Reader &reader, const std::string &fileName,
                       ProcessAction &&action, Fields &&...columns) {
     TypedProcessorFctor proc{std::forward<ProcessAction>(action),
                              std::forward<Fields>(columns)...};
-    read(fileName, proc, separator);
+    reader.read(fileName, proc);
   }
 
 protected:

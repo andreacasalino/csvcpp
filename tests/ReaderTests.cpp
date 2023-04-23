@@ -12,7 +12,7 @@ namespace csvpp::tests {
 TEST_CASE("parse simple file", "[read]") {
   SECTION("ALL fields") {
     CsvMatrixProcessor proc;
-    read(TestData::getFile("simple.csv"), proc);
+    Reader{}.read(TestData::getFile("simple.csv"), proc);
 
     CHECK(proc.values == std::vector<std::vector<std::string>>{
                              {"foo", "Paolo", "bla"}, {"bla", "Rossi", "foo"}});
@@ -31,7 +31,7 @@ TEST_CASE("parse simple file", "[read]") {
           BasicProcessor::FromIterableTag{}, fields.begin(), fields.end());
     }
 
-    read(TestData::getFile("simple.csv"), *proc);
+    Reader{}.read(TestData::getFile("simple.csv"), *proc);
 
     CHECK(proc->values == std::vector<std::vector<std::string>>{
                               {"bla", "foo"}, {"foo", "bla"}});
@@ -56,13 +56,13 @@ TEST_CASE("typed processor", "[read]") {
     };
 
     Processor proc("name", "id", "value");
-    read(TestData::getFile("people.csv"), proc);
+    Reader{}.read(TestData::getFile("people.csv"), proc);
     parsed = std::move(proc.people);
   }
 
   SECTION("as lambda") {
     TypedProcessor<std::string, int, float>::process(
-        ",", TestData::getFile("people.csv"),
+        Reader{}, TestData::getFile("people.csv"),
         [&parsed](std::string name, int id, float value) {
           parsed.emplace(id, std::make_pair(name, value));
         },
@@ -116,7 +116,7 @@ TEST_CASE("typed processor, custom type conversion", "[read]") {
   Data data;
 
   TypedProcessor<Person, int>::process(
-      ",", TestData::getFile("custom_type.csv"),
+      Reader{}, TestData::getFile("custom_type.csv"),
       [&data](Person person, int age) {
         data.emplace_back(std::make_pair(person, age));
       },
