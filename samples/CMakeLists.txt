@@ -12,6 +12,8 @@ target_compile_definitions(${NAME} PUBLIC
 
 endfunction()
 
+MAKE_SAMPLE(Csvpp-ReadMe ReadMe.cpp)
+
 MAKE_SAMPLE(Csvpp-ReadMovies-Sample ReadMovies.cpp)
 MAKE_SAMPLE(Csvpp-ReadPlaces-Sample ReadPlaces.cpp)
 MAKE_SAMPLE(Csvpp-WriteResults-Sample WriteResults.cpp)
