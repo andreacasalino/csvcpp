@@ -9,7 +9,7 @@
 #include <memory>
 
 namespace csvpp::tests {
-TEST_CASE("parse simple file", "[read]") {
+TEST_CASE("basic processor", "[read]") {
   SECTION("ALL fields") {
     CsvMatrixProcessor proc;
     Reader{}.read(TestData::getFile("simple.csv"), proc);
@@ -36,6 +36,16 @@ TEST_CASE("parse simple file", "[read]") {
     CHECK(proc->values == std::vector<std::vector<std::string>>{
                               {"bla", "foo"}, {"foo", "bla"}});
   }
+}
+
+TEST_CASE("string inside quotings", "[read]") {
+  CsvMatrixProcessor proc;
+  Reader{}.read(TestData::getFile("complex.csv"), proc);
+
+  CHECK(proc.values ==
+        std::vector<std::vector<std::string>>{{"325", "Mario Rossi", "32"},
+                                              {"1243", "Paolo Verdi", "23"},
+                                              {"567", "Chiara Neri", "27"}});
 }
 
 TEST_CASE("typed processor", "[read]") {

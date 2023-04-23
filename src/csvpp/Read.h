@@ -7,11 +7,11 @@ class Reader {
 public:
   Reader() = default;
 
-  void setSeparator(char sep) { separator_ = sep; }
+  void setSeparator(char sep);
 
   // true  uses "
   // false uses '
-  void stringDelimiter(char delim) { stringDelimiterKind_ = delim; }
+  void stringDelimiter(bool kind) { stringDelimiterKind_ = kind; };
 
   void read(const std::string &fileName, LineProcessor &proc) const;
 
