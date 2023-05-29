@@ -7,6 +7,7 @@
 #include "Utils.h"
 
 #include <memory>
+#include <unordered_map>
 
 namespace csvpp::tests {
 TEST_CASE("basic processor", "[read]") {
