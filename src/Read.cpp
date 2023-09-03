@@ -1,4 +1,5 @@
 #include <csvpp/Read.h>
+#include <csvpp/String.h>
 
 #include <fstream>
 #include <optional>
@@ -19,78 +20,6 @@ void Reader::setSeparator(char sep) {
 }
 
 namespace {
-struct StringDelimiters {
-  std::size_t front;
-  std::size_t back;
-};
-
-std::optional<StringDelimiters> next_string(std::string &line, std::size_t pos,
-                                            char delimiter) {
-  auto front = line.find(delimiter, pos);
-  if (std::string::npos == front) {
-    return std::nullopt;
-  }
-  auto back = line.find(delimiter, front + 1);
-  if (std::string::npos == front) {
-    throw std::runtime_error{"Wasn't able to find string end delimiter"};
-  }
-  return StringDelimiters{front, back};
-}
-
-void strip(std::string_view &subject, char delimiter) {
-  std::size_t strippedL = 0, strippedR = 0;
-  for (auto it = subject.begin(); it != subject.end(); ++it) {
-    if (*it != ' ') {
-      break;
-    }
-    ++strippedL;
-  }
-  if (strippedL < subject.size()) {
-    for (auto it = subject.rbegin(); it != subject.rend(); ++it) {
-      if (*it != ' ') {
-        break;
-      }
-      ++strippedR;
-    }
-  }
-  if (delimiter == subject[strippedL]) {
-    ++strippedL;
-    ++strippedR;
-  }
-  subject = std::string_view{subject.data() + strippedL,
-                             subject.size() - strippedL - strippedR};
-}
-
-Line split(std::string &line, char sep, char delimiter) {
-  Line res;
-  std::size_t pos = 0;
-  auto nextString = next_string(line, pos, delimiter);
-  while (pos < line.size()) {
-    std::size_t sep_begin = line.find(sep, pos);
-
-    if (sep_begin == std::string::npos) {
-      sep_begin = line.size();
-    }
-
-    if (nextString.has_value()) {
-      if ((nextString->front < sep_begin) && (sep_begin < nextString->back)) {
-        pos = sep_begin + 1;
-        continue;
-      }
-      if (sep_begin > nextString->back) {
-        nextString = next_string(line, sep_begin, delimiter);
-      }
-    }
-
-    auto &added =
-        res.emplace_back(std::string_view{line.data() + pos, sep_begin - pos});
-    strip(added, delimiter);
-
-    pos = sep_begin + 1;
-  }
-  return res;
-}
-
 std::vector<std::size_t> parse_headers(const Line &raw,
                                        const std::vector<std::string> &fields) {
   std::vector<std::size_t> res;
@@ -127,13 +56,11 @@ void Reader::read(const std::string &fileName, LineProcessor &proc) const {
   }
   std::string lineBuffer;
 
-  char stringDelimiter = stringDelimiterKind_ ? '"' : '\'';
-
   std::vector<std::size_t> indices;
   std::size_t headersSize;
   {
     std::getline(stream, lineBuffer);
-    auto raw = split(lineBuffer, separator_, stringDelimiter);
+    auto raw = split(separator_, stringDelimiterKind_, lineBuffer);
     headersSize = raw.size();
     if (auto fields = proc.expectedFields(); fields != nullptr) {
       indices = parse_headers(raw, *fields);
@@ -145,7 +72,7 @@ void Reader::read(const std::string &fileName, LineProcessor &proc) const {
     if (lineBuffer.empty()) {
       continue;
     }
-    auto slices = split(lineBuffer, separator_, stringDelimiter);
+    auto slices = split(separator_, stringDelimiterKind_, lineBuffer);
     if (slices.size() != headersSize) {
       throw std::runtime_error{"found at least one line with a different "
                                "number of elements w.r.t. to headers"};

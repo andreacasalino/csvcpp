@@ -13,7 +13,7 @@ namespace csvpp::tests {
 TEST_CASE("basic processor", "[read]") {
   SECTION("ALL fields") {
     CsvMatrixProcessor proc;
-    Reader{}.read(TestData::getFile("simple.csv"), proc);
+    Reader{}.read(TestData::getFile("simple.csv").string(), proc);
 
     CHECK(proc.values == std::vector<std::vector<std::string>>{
                              {"foo", "Paolo", "bla"}, {"bla", "Rossi", "foo"}});
@@ -32,7 +32,7 @@ TEST_CASE("basic processor", "[read]") {
           BasicProcessor::FromIterableTag{}, fields.begin(), fields.end());
     }
 
-    Reader{}.read(TestData::getFile("simple.csv"), *proc);
+    Reader{}.read(TestData::getFile("simple.csv").string(), *proc);
 
     CHECK(proc->values == std::vector<std::vector<std::string>>{
                               {"bla", "foo"}, {"foo", "bla"}});
@@ -41,7 +41,7 @@ TEST_CASE("basic processor", "[read]") {
 
 TEST_CASE("string inside quotings", "[read]") {
   CsvMatrixProcessor proc;
-  Reader{}.read(TestData::getFile("complex.csv"), proc);
+  Reader{}.read(TestData::getFile("complex.csv").string(), proc);
 
   CHECK(proc.values ==
         std::vector<std::vector<std::string>>{{"325", "Mario Rossi", "32"},
@@ -67,13 +67,13 @@ TEST_CASE("typed processor", "[read]") {
     };
 
     Processor proc("name", "id", "value");
-    Reader{}.read(TestData::getFile("people.csv"), proc);
+    Reader{}.read(TestData::getFile("people.csv").string(), proc);
     parsed = std::move(proc.people);
   }
 
   SECTION("as lambda") {
     TypedProcessor<std::string, int, float>::process(
-        Reader{}, TestData::getFile("people.csv"),
+        Reader{}, TestData::getFile("people.csv").string(),
         [&parsed](std::string name, int id, float value) {
           parsed.emplace(id, std::make_pair(name, value));
         },
@@ -127,7 +127,7 @@ TEST_CASE("typed processor, custom type conversion", "[read]") {
   Data data;
 
   TypedProcessor<Person, int>::process(
-      Reader{}, TestData::getFile("custom_type.csv"),
+      Reader{}, TestData::getFile("custom_type.csv").string(),
       [&data](Person person, int age) {
         data.emplace_back(std::make_pair(person, age));
       },

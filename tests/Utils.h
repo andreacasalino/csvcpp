@@ -1,14 +1,15 @@
 #pragma once
 
+#include <filesystem>
 #include <string>
 
 #include <csvpp/BasicProcessor.h>
 
 namespace csvpp::tests {
 struct TestData {
-  static std::string getBase();
+  static std::filesystem::path getBase();
 
-  static std::string getFile(const std::string &fileName);
+  static std::filesystem::path getFile(const std::string &fileName);
 };
 
 class CsvMatrixProcessor : public BasicProcessor {
