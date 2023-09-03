@@ -81,7 +81,21 @@ csvpp::TypedProcessor<std::string, std::string, int, float>::process(
    "name", "surname", "age", "height");
 ```
 
-Trivial types are by deafult converted. However, you can also define custom converters for complex ones, refer to  [this](./samples/ReadPlaces.cpp) sample.
+Trivial types are by deafult converted. However, you can also define custom converters for complex one by specializing s custom **Converter** with something along these lines:
+```cpp
+namespace csvpp {
+
+template <> struct Converter<YourSpecialType> {
+  static YourSpecialType convert(const std::string_view &subject) {
+    // code to convert the passed string_view to YourSpecialType
+    YourSpecialType res = ...
+    return res;
+  }
+};
+
+}
+```
+to this purpose have a look to  [this](./samples/ReadPlaces.cpp) sample.
 
 ## CMAKE SUPPORT
    

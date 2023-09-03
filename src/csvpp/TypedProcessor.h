@@ -1,45 +1,19 @@
 #pragma once
 
+#include <csvpp/Conversions.h>
 #include <csvpp/LineProcessor.h>
 #include <csvpp/Read.h>
 
 #include <functional>
 
 namespace csvpp {
-template <typename T> struct Converter {};
-
-template <> struct Converter<std::string> {
-  static std::string convert(const std::string_view &subject) {
-    return std::string{subject};
-  }
-};
-
-template <> struct Converter<int> {
-  static int convert(const std::string_view &subject) {
-    return std::atoi(subject.data()); // TODO improve this
-  }
-};
-
-template <> struct Converter<double> {
-  static double convert(const std::string_view &subject) {
-    return std::atof(subject.data()); // TODO improve this
-  }
-};
-
-template <> struct Converter<float> {
-  static float convert(const std::string_view &subject) {
-    return static_cast<float>(std::atof(subject.data())); // TODO improve this
-  }
-};
-
-// TODO other converters
-
 template <typename... Ts> class TypedProcessor : public LineProcessor {
 public:
   template <typename... Fields>
   TypedProcessor(Fields &&...columns)
       : LineProcessor{std::forward<Fields>(columns)...} {
-    // TODO static assertion if number of fields is different from size of Ts
+    static_assert(sizeof...(Fields) == sizeof...(Ts),
+                  "number of fields should be equal to number of types");
   }
 
   template <typename ProcessAction, typename... Fields>

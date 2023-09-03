@@ -1,12 +1,9 @@
 #pragma once
 
+#include <csvpp/String.h>
 #include <optional>
-#include <string>
-#include <string_view>
-#include <vector>
 
 namespace csvpp {
-using Line = std::vector<std::string_view>;
 
 class LineProcessor {
 public:
@@ -23,24 +20,11 @@ public:
 protected:
   LineProcessor() = default;
 
-  LineProcessor(const std::string &lastField);
-
-  template <typename... Columns>
-  LineProcessor(const std::string &firstField, Columns &&...otherColumns)
-      : LineProcessor{std::forward<Columns>(otherColumns)...} {
-    addColumn<false>(firstField);
+  template <typename... Columns> LineProcessor(Columns &&...columns) {
+    (addColumn(std::forward<Columns>(columns)), ...);
   }
 
-  template <bool BackFront = true> void addColumn(const std::string &column) {
-    if (!fields_.has_value()) {
-      fields_.emplace();
-    }
-    if constexpr (BackFront) {
-      fields_->emplace_back(column);
-    } else {
-      fields_->insert(fields_->begin(), column);
-    }
-  }
+  void addColumn(const std::string &column);
 
   // if empty, means take ALL columns from a line in the order they appear in
   // the csv

@@ -19,9 +19,8 @@ public:
     });
   }
 
-  template <bool BackFront = true>
   BasicProcessor &addColumn(const std::string &column) {
-    this->LineProcessor::addColumn<BackFront>(column);
+    this->LineProcessor::addColumn(column);
     return *this;
   }
 };

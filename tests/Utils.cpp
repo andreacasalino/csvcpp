@@ -1,10 +1,12 @@
 #include "Utils.h"
 
 namespace csvpp::tests {
-std::string TestData::getBase() { return std::string{TEST_FOLDER} + "/data"; }
+std::filesystem::path TestData::getBase() {
+  return std::filesystem::path{TEST_FOLDER} / "data";
+}
 
-std::string TestData::getFile(const std::string &fileName) {
-  return TestData::getBase() + "/" + fileName;
+std::filesystem::path TestData::getFile(const std::string &fileName) {
+  return TestData::getBase() / fileName;
 }
 
 void CsvMatrixProcessor::process(const Line &row) {
